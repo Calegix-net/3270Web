@@ -278,6 +278,82 @@ Ensure the proxy sets the header on the way through, for example in nginx:
 proxy_set_header X-Forwarded-Proto $scheme;
 ```
 
+### Serving under a path prefix
+
+To publish 3270Web at a path such as `https://example.com/3270` rather than at
+the root of a hostname, set `BASE_PATH`:
+
+```bash
+BASE_PATH=/3270
+```
+
+The value is normalised to one leading slash and no trailing slash, so `3270`
+and `/3270/` both mean `/3270`. Path segments may use letters, digits, `.`, `_`,
+`~` and `-`. Anything else stops the server at startup rather than being tidied
+into a prefix you did not ask for. Leave it unset to serve from the root.
+
+**The proxy must pass the full path unchanged.** 3270Web removes the prefix
+itself, so do not strip it at the proxy: in nginx, that means no URI on
+`proxy_pass`.
+
+```nginx
+# Under the prefix, and nothing else.
+location = /3270 {
+    proxy_pass http://127.0.0.1:3270;
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+
+location /3270/ {
+    proxy_pass http://127.0.0.1:3270;   # no path here: /3270/screen stays /3270/screen
+
+    # Sign-in and every form post compare the Origin header with this, so it has
+    # to be the host and port the browser used. $host would drop a non-default port.
+    proxy_set_header Host $http_host;
+
+    # With TRUST_PROXY_HEADERS=true, these make cookies Secure and record the
+    # real client address.
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-Host $http_host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+    # The live screen is a long-lived event stream, which buffering would hold
+    # back and a short read timeout would keep cutting.
+    proxy_http_version 1.1;
+    proxy_set_header Connection "";
+    proxy_buffering off;
+    proxy_read_timeout 1h;
+}
+```
+
+And in 3270Web, behind a proxy that terminates TLS:
+
+```bash
+BASE_PATH=/3270
+TRUST_PROXY_HEADERS=true
+```
+
+With `BASE_PATH` set:
+
+- Every page, asset, form post, script request, redirect and download stays
+  under the prefix, and `/3270` redirects to `/3270/`.
+- Anything outside the prefix answers 404, with one exception: `/healthz` also
+  answers without the prefix, because the container's `HEALTHCHECK` calls it.
+  It is reachable at `/3270/healthz` too.
+- Cookies are scoped to `Path=/3270`, so another application on the same
+  hostname neither receives them nor overwrites them.
+
+A few things outside 3270Web have to know the prefix as well:
+
+- **Single sign-on.** `OIDC_REDIRECT_URL` is the address you registered with the
+  provider, so it includes the prefix:
+  `https://example.com/3270/auth/sso/callback`.
+- **REST API and MCP clients** use it as part of the base URL, for example
+  `https://example.com/3270/api/v1/sessions` and
+  `3270Web mcp --url https://example.com/3270`.
+- **Embedding.** The `src` of the iframe includes it:
+  `https://example.com/3270/screen?embed=1`.
+
 ## User Accounts
 
 3270Web has no sign-in by default. Set `AUTH_MODE=local` to require one — see
