@@ -1503,7 +1503,7 @@
       "curl -H \"Authorization: Bearer $API_TOKEN\" \\\n" +
       "     -H 'Content-Type: application/json' \\\n" +
       "     -d '" + body + "' \\\n" +
-      "     " + window.location.origin + "/api/v1/sessions/$SESSION_ID/tasks/run";
+      "     " + window.location.origin + window.basePath.url("/api/v1/sessions/$SESSION_ID/tasks/run");
     var pre = el("pre", "wizard-snippet", text);
     pre.appendChild(copyButton(text, "Copy the request"));
     return pre;

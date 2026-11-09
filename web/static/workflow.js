@@ -319,7 +319,7 @@
         modalDownloadName = nextName || 'workflow.json';
         setStatus('Saved. Reloading workflow...');
         window.setTimeout(() => {
-          window.location.assign('/screen');
+          window.location.assign(window.basePath.url('/screen'));
         }, 120);
         return true;
       })
@@ -457,8 +457,8 @@
   const recordingStart = document.querySelector('[data-recording-start]');
   const recordingStartDisabled = document.querySelector('[data-recording-start-disabled]');
   const workflowLoadTrigger = document.querySelector('[data-workflow-trigger]');
-  const workflowPlayButton = document.querySelector('form[action="/workflow/play"] button');
-  const workflowDebugButton = document.querySelector('form[action="/workflow/debug"] button');
+  const workflowPlayButton = document.querySelector('form[action$="/workflow/play"] button');
+  const workflowDebugButton = document.querySelector('form[action$="/workflow/debug"] button');
   const workflowStatusFileIcon = document.querySelector('.workflow-status-file-icon');
   const playbackIndicator = document.querySelector('[data-playback-indicator]');
   const playbackComplete = document.querySelector('[data-playback-complete]');
@@ -1481,14 +1481,14 @@
     playbackPollTimer = window.setTimeout(pollPlayback, playbackFastMs);
   }
 
-  const removeRecordingForm = document.querySelector('form[action="/workflow/remove"]');
+  const removeRecordingForm = document.querySelector('form[action$="/workflow/remove"]');
   if (removeRecordingForm) {
     removeRecordingForm.addEventListener('submit', () => {
       hideActiveRunRow();
     });
   }
 
-  const playbackStartForms = document.querySelectorAll('form[action="/workflow/play"], form[action="/workflow/debug"]');
+  const playbackStartForms = document.querySelectorAll('form[action$="/workflow/play"], form[action$="/workflow/debug"]');
   playbackStartForms.forEach((form) => {
     form.addEventListener('submit', () => {
       hideActiveRunRow();
@@ -1539,7 +1539,7 @@
       return;
     }
     const actionUrl = new URL(form.action, window.location.origin);
-    if (!workflowAsyncActions.has(actionUrl.pathname)) {
+    if (!workflowAsyncActions.has(window.basePath.strip(actionUrl.pathname))) {
       return;
     }
 
@@ -1547,7 +1547,7 @@
 
     const submitter = event.submitter;
     const container = document.querySelector('.screen-container');
-    const actionPath = actionUrl.pathname;
+    const actionPath = window.basePath.strip(actionUrl.pathname);
     if (
       actionPath === '/workflow/play' ||
       actionPath === '/workflow/debug' ||

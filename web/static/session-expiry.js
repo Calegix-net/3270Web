@@ -160,7 +160,7 @@
       notify(code === "password_change_required" ? "Change your password to continue. Your work remains open." : "Your sign-in expired. Sign in again to continue; your work remains open.", "warning", {
         duration: 0,
         action: { label: code === "password_change_required" ? "Change password" : "Sign in", onClick: function () {
-          window.open(code === "password_change_required" ? "/account/password" : "/login", "_blank", "noopener");
+          window.open(window.basePath.url(code === "password_change_required" ? "/account/password" : "/login"), "_blank", "noopener");
         } }
       });
       return;

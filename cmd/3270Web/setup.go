@@ -240,7 +240,7 @@ func (app *App) RequireSetup() gin.HandlerFunc {
 		if wantsJSON(c) {
 			c.AbortWithStatusJSON(http.StatusServiceUnavailable, gin.H{
 				"error": "3270Web is not set up yet",
-				"setup": setupPath,
+				"setup": app.basePath + setupPath,
 			})
 			return
 		}

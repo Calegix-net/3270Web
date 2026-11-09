@@ -199,7 +199,7 @@
     busy = true;
     post("/sessions/switch", { id: id }).then(
       function () {
-        window.location.href = "/screen";
+        window.location.href = window.basePath.url("/screen");
       },
       function (err) {
         busy = false;
@@ -217,13 +217,13 @@
     post("/sessions/close", { id: id }).then(
       function (payload) {
         if (payload && payload.remaining > 0) {
-          window.location.href = "/screen";
+          window.location.href = window.basePath.url("/screen");
           return;
         }
         // That was the last one; there is no terminal left to show. Marked as
         // a disconnect so the landing page asks where to go next instead of
         // dialling the one host this account is assigned — see HomeHandler.
-        window.location.href = "/?disconnected=1";
+        window.location.href = window.basePath.url("/?disconnected=1");
       },
       function (err) {
         busy = false;
@@ -238,7 +238,7 @@
     notify("Connecting to " + label + "…", "info", { duration: 2000 });
     post("/sessions/new", params).then(
       function () {
-        window.location.href = "/screen";
+        window.location.href = window.basePath.url("/screen");
       },
       function (err) {
         busy = false;

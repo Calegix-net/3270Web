@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {{template "base-path"}}
     <title>3270Web - Connect</title>
     <!-- Without this, mobile browsers lay the page out at a ~980px virtual
          viewport and scale it down: the desktop layout is rendered in
@@ -39,36 +40,36 @@
     <meta name="twitter:image" content="{{ .BaseURL }}/static/og-image.png">
     <meta name="twitter:image:alt" content="3270Web — the mainframe in a browser tab">
     {{ end }}
-    <link rel="icon" type="image/png" href="/static/favicon-32.png">
-    <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
-    <link rel="stylesheet" type="text/css" href="/static/style.css?v=22">
+    <link rel="icon" type="image/png" href="{{basePath}}/static/favicon-32.png">
+    <link rel="apple-touch-icon" href="{{basePath}}/static/apple-touch-icon.png">
+    <link rel="stylesheet" type="text/css" href="{{basePath}}/static/style.css?v=22">
     <!-- Shared design system layer; see the note in screen.html. -->
-    <link rel="stylesheet" type="text/css" href="/static/ui-polish.css?v=20">
-    <link rel="stylesheet" type="text/css" href="/static/auth.css?v=8">
+    <link rel="stylesheet" type="text/css" href="{{basePath}}/static/ui-polish.css?v=20">
+    <link rel="stylesheet" type="text/css" href="{{basePath}}/static/auth.css?v=8">
     <!-- Embedded mode; inert unless the page was asked for with ?embed=1.
          The connect page needs it too: a fresh frame lands here first, and a
          chrome-less terminal behind a full-chrome connect form is worse than
          either on its own. See docs/embedding.md. -->
-    <link rel="stylesheet" type="text/css" href="/static/embed.css?v=1">
+    <link rel="stylesheet" type="text/css" href="{{basePath}}/static/embed.css?v=1">
     <!-- Touch support. Every rule is behind body.touch-device, which touch.js
          adds only on a coarse pointer, so a desktop renders unchanged.
          touch.js already knows this page has no terminal and builds no key
          bar here; what it does do is mark the body, which is what gives the
          connect form thumb-sized controls. Without the pair loaded, the first
          page an operator meets on a phone was the one page with none of it. -->
-    <link rel="stylesheet" type="text/css" href="/static/touch.css?v=7">
-    <link rel="stylesheet" href="/static/lib/tippy.css">
-    <script src="/static/lib/popper.min.js" defer></script>
-    <script src="/static/lib/tippy-bundle.umd.min.js" defer></script>
-    <script src="/static/touch.js?v=4" defer></script>
-    <script src="/static/theme.js?v=10" defer></script>
-    <script src="/static/background.js?v=2" defer></script>
-    <script src="/static/ui.js?v=22" defer></script>
-    <script src="/static/connection-profiles.js?v=2" defer></script>
-    <link rel="stylesheet" href="/static/activation.css?v=1">
+    <link rel="stylesheet" type="text/css" href="{{basePath}}/static/touch.css?v=7">
+    <link rel="stylesheet" href="{{basePath}}/static/lib/tippy.css">
+    <script src="{{basePath}}/static/lib/popper.min.js" defer></script>
+    <script src="{{basePath}}/static/lib/tippy-bundle.umd.min.js" defer></script>
+    <script src="{{basePath}}/static/touch.js?v=4" defer></script>
+    <script src="{{basePath}}/static/theme.js?v=10" defer></script>
+    <script src="{{basePath}}/static/background.js?v=2" defer></script>
+    <script src="{{basePath}}/static/ui.js?v=22" defer></script>
+    <script src="{{basePath}}/static/connection-profiles.js?v=2" defer></script>
+    <link rel="stylesheet" href="{{basePath}}/static/activation.css?v=1">
 </head>
 <body {{ if .Embedded }}class="embedded" data-embedded="true"{{ end }} data-embed-origins="{{ .EmbedOrigins }}" data-account="{{ .Auth.UserID }}" data-enforced-target="{{ .EnforcedTarget }}">
-    <script src="/static/early-theme-init.js"></script>
+    <script src="{{basePath}}/static/early-theme-init.js"></script>
     <!-- Custom themes, inlined because /api/themes needs a session and this
          page runs before one exists. See renderConnectPage. -->
     <div hidden data-file-themes="{{ .ThemesJSON }}"></div>
@@ -95,8 +96,8 @@
                     <span class="user-chip">
                         <span class="admin-avatar" aria-hidden="true">{{ slice .Auth.Username 0 1 }}</span>
                         <span class="user-chip-name" title="Signed in as {{ .Auth.Username }}">{{ .Auth.Username }}</span>
-                        {{ if .Auth.IsAdmin }}<a class="button-link" href="/admin">Admin</a>{{ end }}
-                        <form action="/logout" method="post"><button type="submit">Sign out</button></form>
+                        {{ if .Auth.IsAdmin }}<a class="button-link" href="{{basePath}}/admin">Admin</a>{{ end }}
+                        <form action="{{basePath}}/logout" method="post"><button type="submit">Sign out</button></form>
                     </span>
                     {{ end }}
                     <button type="button" data-about-open>About</button>
@@ -116,7 +117,7 @@
                 {{ if .ConnectDetails }}<details><summary>Technical details</summary><pre data-connection-diagnostic>{{ .ConnectDetails }}</pre><button type="button" data-copy-diagnostic>Copy details</button></details>{{ end }}
             </div>
             {{ end }}
-            <form action="/connect" method="post" id="connect-form">
+            <form action="{{basePath}}/connect" method="post" id="connect-form">
                 <fieldset class="connect-row">
                     <label for="hostname-input">Mainframe address<span class="required-mark" aria-hidden="true">*</span></label>
                     <input id="hostname-input" type="text" name="hostname" value="{{ .DefaultHost }}" data-host-input required autofocus placeholder="mainframe.example.com:992" aria-describedby="connect-hint" {{ if .EnforcedTarget }}readonly{{ end }}>
@@ -233,9 +234,9 @@
             </div>
         </div>
     </div>
-    <script src="/static/modal-utils.js?v=2" defer></script>
-    <script src="/static/about-modal.js" defer></script>
-    <script src="/static/notifications.js" defer></script>
-    <script src="/static/connect-page.js?v=2"></script>
+    <script src="{{basePath}}/static/modal-utils.js?v=2" defer></script>
+    <script src="{{basePath}}/static/about-modal.js" defer></script>
+    <script src="{{basePath}}/static/notifications.js" defer></script>
+    <script src="{{basePath}}/static/connect-page.js?v=2"></script>
 </body>
 </html>

@@ -496,7 +496,7 @@ func (app *App) ssoLogoutURL(c *gin.Context) string {
 	}
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
-	return app.oidcProvider.EndSessionURL(ctx, "", absoluteURL(c, loginPath))
+	return app.oidcProvider.EndSessionURL(ctx, "", absoluteURL(c, app.basePath+loginPath))
 }
 
 // absoluteURL renders a path on this server as a full URL, which is what a

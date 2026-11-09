@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {{template "base-path"}}
     <title>3270Web - Error</title>
     <!-- Without this, mobile browsers lay the page out at a ~980px virtual
          viewport and scale it down: the desktop layout is rendered in
@@ -13,15 +14,15 @@
     <!-- An error page has nothing worth indexing, and the message it carries
          can name a host or a workflow file. -->
     <meta name="robots" content="noindex, nofollow">
-    <link rel="icon" type="image/png" href="/static/favicon-32.png">
-    <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
-    <link rel="stylesheet" type="text/css" href="/static/style.css?v=22">
-    <link rel="stylesheet" href="/static/ui-polish.css?v=20">
-    <script src="/static/theme.js?v=10" defer></script>
-    <link rel="stylesheet" href="/static/activation.css?v=1">
+    <link rel="icon" type="image/png" href="{{basePath}}/static/favicon-32.png">
+    <link rel="apple-touch-icon" href="{{basePath}}/static/apple-touch-icon.png">
+    <link rel="stylesheet" type="text/css" href="{{basePath}}/static/style.css?v=22">
+    <link rel="stylesheet" href="{{basePath}}/static/ui-polish.css?v=20">
+    <script src="{{basePath}}/static/theme.js?v=10" defer></script>
+    <link rel="stylesheet" href="{{basePath}}/static/activation.css?v=1">
 </head>
 <body>
-    <script src="/static/early-theme-init.js"></script>
+    <script src="{{basePath}}/static/early-theme-init.js"></script>
     <div class="bg-overlay" data-bg-toggle title="Click to toggle background animation" role="button" tabindex="0" aria-pressed="true" aria-label="Toggle background animation">
         <canvas id="bg-canvas" aria-hidden="true"></canvas>
     </div>
@@ -32,9 +33,9 @@
             <h1 class="error-title">Something went wrong</h1>
             <p class="error-message">The operation could not be completed. Your session has not been disconnected.</p>
             <details><summary>Technical details</summary><p>{{ .Error }}</p></details>
-            <div class="error-actions"><a class="button-link primary-action" href="/screen">Return to terminal</a><a class="button-link" href="/">Choose a connection</a></div>
+            <div class="error-actions"><a class="button-link primary-action" href="{{basePath}}/screen">Return to terminal</a><a class="button-link" href="{{basePath}}/">Choose a connection</a></div>
         </div>
     </div>
-    <script src="/static/background.js?v=2" defer></script>
+    <script src="{{basePath}}/static/background.js?v=2" defer></script>
 </body>
 </html>

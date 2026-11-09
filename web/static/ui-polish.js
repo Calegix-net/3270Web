@@ -61,16 +61,16 @@
     { label: "Start recording", group: "Recording", sel: "[data-recording-start] button[type=submit]", icon: "record" },
     { label: "Stop recording", group: "Recording", sel: "[data-recording-stop] button[type=submit]", icon: "stop" },
     { label: "Load recording from file", group: "Recording", sel: "[data-workflow-trigger]", icon: "upload" },
-    { label: "Play recording", group: "Recording", sel: ".workflow-controls form[action='/workflow/play'] button", icon: "play" },
-    { label: "Debug recording step by step", group: "Recording", sel: ".workflow-controls form[action='/workflow/debug'] button", icon: "chaos" },
+    { label: "Play recording", group: "Recording", sel: ".workflow-controls form[action$='/workflow/play'] button", icon: "play" },
+    { label: "Debug recording step by step", group: "Recording", sel: ".workflow-controls form[action$='/workflow/debug'] button", icon: "chaos" },
     { label: "View recording JSON", group: "Recording", sel: ".workflow-controls [data-modal-open]", icon: "doc" },
-    { label: "Remove loaded recording", group: "Recording", sel: ".workflow-controls form[action='/workflow/remove'] button", icon: "trash" },
+    { label: "Remove loaded recording", group: "Recording", sel: ".workflow-controls form[action$='/workflow/remove'] button", icon: "trash" },
     { label: "Download recording", group: "Recording", sel: ".record-download-link", icon: "download" },
 
     // Playback
-    { label: "Step playback", group: "Playback", sel: "[data-playback-debug-controls] form[action='/workflow/step'] button", icon: "play" },
+    { label: "Step playback", group: "Playback", sel: "[data-playback-debug-controls] form[action$='/workflow/step'] button", icon: "play" },
     { label: "Pause or resume playback", group: "Playback", sel: "[data-playback-pause-button]", icon: "play" },
-    { label: "Stop playback", group: "Playback", sel: "[data-playback-play-controls] form[action='/workflow/stop'] button", icon: "stop" },
+    { label: "Stop playback", group: "Playback", sel: "[data-playback-play-controls] form[action$='/workflow/stop'] button", icon: "stop" },
 
     // Chaos
     { label: "Start chaos exploration", group: "Chaos", sel: "[data-chaos-start]", icon: "chaos" },

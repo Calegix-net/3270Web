@@ -634,7 +634,7 @@
       // A navigation rather than a fetch: the response carries
       // Content-Disposition, and letting the browser handle it is what puts
       // the file in the downloads folder instead of in memory.
-      window.location.href = url;
+      window.location.href = window.basePath.url(url);
     });
   }
 

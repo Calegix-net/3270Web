@@ -218,7 +218,7 @@
       actions.className = "printer-job-actions";
       var download = document.createElement("a");
       download.className = "printer-job-download";
-      download.href = "/printer/jobs/download?name=" + encodeURIComponent(job.name);
+      download.href = window.basePath.url("/printer/jobs/download?name=" + encodeURIComponent(job.name));
       download.setAttribute("download", job.name);
       download.textContent = "Download";
       actions.appendChild(download);

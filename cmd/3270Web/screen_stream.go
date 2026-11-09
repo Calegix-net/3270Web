@@ -120,7 +120,7 @@ func (app *App) renderScreenStreamUpdate(s *session.Session, lastHTML *string) (
 		screen = limitScreenForDisplay(screen, rows, cols)
 	}
 	recordScreenHistory(s, screen)
-	rendered := app.Renderer.Render(screen, "/submit", s.ID)
+	rendered := app.Renderer.Render(screen, app.basePath+"/submit", s.ID)
 	oia := screenOIA(screen)
 	// Dedup on the OIA as well as the HTML: a host that locks the keyboard or
 	// drops the connection without repainting the screen produces byte-identical

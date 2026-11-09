@@ -50,6 +50,9 @@ type App struct {
 	SessionManager *session.Manager
 	Renderer       render.Renderer
 	Config         *config.Config
+	// basePath is the path prefix this instance is served under, or "" for the
+	// root. Validated in buildRouter. See basepath.go.
+	basePath string
 	// authMode selects how callers are identified. Validated at startup, so
 	// handlers can treat it as a known value.
 	authMode authz.Mode
@@ -317,6 +320,11 @@ func buildRouter(app *App) (*gin.Engine, error) {
 	if err := app.configureAuth(); err != nil {
 		return nil, err
 	}
+	basePath, err := normalizeBasePath(os.Getenv(basePathEnv))
+	if err != nil {
+		return nil, err
+	}
+	app.basePath = basePath
 
 	r := gin.Default()
 	if err := r.SetTrustedProxies(nil); err != nil {
@@ -334,6 +342,7 @@ func buildRouter(app *App) (*gin.Engine, error) {
 	// After authentication, so a limit applies to the account rather than to
 	// whoever happens to share an address with them.
 	r.Use(app.RateLimit())
+	r.SetFuncMap(app.templateFuncs())
 	templatesGlob, tmplErr := resolveTemplatesGlob(app.assetDir())
 	if tmplErr == nil {
 		r.LoadHTMLGlob(templatesGlob)
@@ -714,7 +723,7 @@ func main() {
 
 	srv := &http.Server{
 		Addr:    addr,
-		Handler: r,
+		Handler: withBasePath(app.basePath, r),
 	}
 
 	go func() {
@@ -745,7 +754,7 @@ func main() {
 			return
 		default:
 		}
-		runAppWindow("http://"+addr+"/", requestShutdown)
+		runAppWindow("http://"+addr+app.basePath+"/", requestShutdown)
 		return
 	}
 
@@ -1321,7 +1330,7 @@ func (app *App) renderConnectPage(c *gin.Context, status int, hostname string, c
 		// Absolute origin for the connect page's social preview tags. Empty on
 		// a request with no usable Host, in which case the template emits no
 		// card rather than one pointing at a URL that cannot be fetched.
-		"BaseURL": pageBaseURL(c),
+		"BaseURL": app.prefixedPageBaseURL(c),
 	})
 }
 
@@ -1661,7 +1670,7 @@ func (app *App) ScreenHandler(c *gin.Context) {
 		screen = limitScreenForDisplay(screen, rows, cols)
 	}
 	recordScreenHistory(s, screen)
-	rendered := app.Renderer.Render(screen, "/submit", s.ID)
+	rendered := app.Renderer.Render(screen, app.basePath+"/submit", s.ID)
 	snap := app.snapshotSession(s)
 	themeCSS := app.buildThemeCSS(snap.Prefs)
 
@@ -1779,7 +1788,7 @@ func (app *App) ScreenContentHandler(c *gin.Context) {
 		screen = limitScreenForDisplay(screen, rows, cols)
 	}
 	recordScreenHistory(s, screen)
-	rendered := app.Renderer.Render(screen, "/submit", s.ID)
+	rendered := app.Renderer.Render(screen, app.basePath+"/submit", s.ID)
 	keyboardLabel, modelLabel, dimensionLabel, cursorLabel := screenStatusLabels(screen)
 	payload := mergeOIA(gin.H{
 		"html":             rendered,

@@ -1601,7 +1601,7 @@
             if (window.ThreeSeventyWeb && window.ThreeSeventyWeb.notify) {
                 window.ThreeSeventyWeb.notify('Settings saved.', 'success');
             }
-            const onConnectScreen = window.location.pathname === '/';
+            const onConnectScreen = window.basePath.strip(window.location.pathname) === '/';
             if (onConnectScreen) {
                 const restartNow = await askRestartConfirmation();
                 if (restartNow) {

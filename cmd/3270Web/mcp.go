@@ -200,7 +200,12 @@ func findRunningInstance() (string, string) {
 	if resp.StatusCode != http.StatusOK {
 		return "", ""
 	}
-	return url, tok
+	// The health check answers without the prefix; nothing else does.
+	basePath, err := normalizeBasePath(os.Getenv(basePathEnv))
+	if err != nil {
+		return "", ""
+	}
+	return url + basePath, tok
 }
 
 // startOwnInstance boots 3270Web on a loopback port with a generated token.
@@ -251,14 +256,14 @@ func startOwnInstance(conversation string) (target, func(), error) {
 	if err != nil {
 		return target{}, nil, fmt.Errorf("listen on loopback: %w", err)
 	}
-	srv := &http.Server{Handler: router}
+	srv := &http.Server{Handler: withBasePath(app.basePath, router)}
 	go func() {
 		if err := srv.Serve(ln); err != nil && err != http.ErrServerClosed {
 			log.Printf("3270Web server stopped: %v", err)
 		}
 	}()
 
-	url := "http://" + ln.Addr().String()
+	url := "http://" + ln.Addr().String() + app.basePath
 	// Stderr, not stdout — and worth printing, because the whole point of
 	// running the UI is that someone can watch the session.
 	fmt.Fprintf(os.Stderr, "3270Web UI: %s\n", url)

@@ -314,7 +314,7 @@
     // the top window. If the endpoint returns an error page (e.g. 403 HTML),
     // navigating window.location would discard the live terminal session.
     const link = document.createElement('a');
-    link.href = '/logs/download';
+    link.href = window.basePath.url('/logs/download');
     link.download = '';
     link.rel = 'noopener';
     document.body.appendChild(link);
