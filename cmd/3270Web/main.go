@@ -1784,6 +1784,9 @@ func (app *App) ScreenContentHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "screen unavailable"})
 		return
 	}
+	// Numbered at the read, as the stream's screens are, so the browser can
+	// tell this answer from a newer one the stream may already have shown.
+	seq := s.NextScreenSeq()
 	if rows, cols, ok := app.modelDimensions(); ok {
 		screen = limitScreenForDisplay(screen, rows, cols)
 	}
@@ -1796,6 +1799,7 @@ func (app *App) ScreenContentHandler(c *gin.Context) {
 		"statusModel":      modelLabel,
 		"statusDimensions": dimensionLabel,
 		"statusCursor":     cursorLabel,
+		"seq":              seq,
 	}, screen)
 	if cursorRow, cursorCol, ok := screen.StatusCursor(); ok {
 		payload["cursorRow"] = cursorRow
@@ -1968,7 +1972,13 @@ func (app *App) processSubmit(c *gin.Context, s *session.Session) error {
 	log.Printf("Submit: normalized key=%q", actionKey)
 	recordActionKey(s, actionKey)
 
-	if err := h.SendKey(actionKey); err != nil {
+	// Noted on both sides of the send. Before, so the live stream is already
+	// watching while the key waits for the keyboard; after, so its window is
+	// measured from the moment the host is free to answer.
+	s.NoteKeySent()
+	err = h.SendKey(actionKey)
+	s.NoteKeySent()
+	if err != nil {
 		return fmt.Errorf("send key failed: %w", err)
 	}
 	return nil

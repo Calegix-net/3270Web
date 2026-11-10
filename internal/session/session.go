@@ -9,6 +9,7 @@ import (
 	"log"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/jnnngs/3270Web/internal/host"
@@ -44,6 +45,10 @@ type Session struct {
 	LastPlaybackDelayRange   string
 	LastPlaybackDelayApplied string
 	ScreenHistory            []ScreenHistoryEntry
+
+	keyMu     sync.Mutex
+	key       keySignal
+	screenSeq atomic.Uint64
 }
 
 // RecordScreen appends a screen to the session's history, ignoring a repeat of

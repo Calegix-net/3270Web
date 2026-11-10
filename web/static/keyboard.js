@@ -379,6 +379,32 @@
     renderOIA();
   }
 
+  // screens records which screen the page is showing. Two paths bring a new
+  // one, the fetch after a key and the live stream (screen-live.js), and they
+  // can land in either order; each payload carries the number the server gave
+  // the read, so the older of two is recognised and not put over the newer.
+  var screens = {
+    seq: null,
+    html: null,
+    accept: function (payload) {
+      if (typeof payload.seq !== "number" || !isFinite(payload.seq)) {
+        return true;
+      }
+      return this.seq === null || payload.seq > this.seq;
+    },
+    isShowing: function (payload) {
+      return this.html !== null && payload.html === this.html;
+    },
+    shown: function (payload) {
+      if (typeof payload.seq === "number" && isFinite(payload.seq)) {
+        this.seq = payload.seq;
+      }
+      this.html = payload.html;
+    }
+  };
+  window.ThreeSeventyWeb = window.ThreeSeventyWeb || {};
+  window.ThreeSeventyWeb.screens = screens;
+
   function submitFormWithoutNavigation(form, formId, preferredFieldName, preferredCaret) {
     var action = "/submit/async";
     var method = (form.getAttribute("method") || "post").toUpperCase();
@@ -415,6 +441,10 @@
         if (!payload || typeof payload.html !== "string") {
           return;
         }
+        if (!screens.accept(payload)) {
+          // The live stream has already shown a newer screen than this one.
+          return;
+        }
         if (
           typeof payload.cursorRow === "number" &&
           isFinite(payload.cursorRow) &&
@@ -431,6 +461,7 @@
           return;
         }
         container.innerHTML = payload.html;
+        screens.shown(payload);
         updateScreenStatusLine(payload);
 
         var updatedForm = container.querySelector("form.renderer-form");

@@ -17,6 +17,42 @@
   // guard here is recency of actual typing instead.
   var RECENT_INPUT_GRACE_MS = 1500;
   var lastLocalInputAt = 0;
+  // The form that typing went into. Typing protects only the screen it was
+  // done on: once a key has been sent and that screen replaced, what was
+  // typed has gone to the host, and holding back the host's answer on its
+  // account is what left the answer to a fast key unshown. A TSO host frees
+  // the keyboard before it answers, so its answer always arrives through this
+  // stream, and always within moments of the operator's last keystroke.
+  var lastInputForm = null;
+  // An update held back while the operator types is kept, not dropped. The
+  // server sends a screen once and does not send it again unless it changes,
+  // so an update dropped here was gone until the host next drew something.
+  var pendingUpdate = null;
+  var pendingTimer = null;
+
+  function typingOnThisScreen(container) {
+    return (
+      !!lastInputForm &&
+      container.contains(lastInputForm) &&
+      Date.now() - lastLocalInputAt < RECENT_INPUT_GRACE_MS
+    );
+  }
+
+  function deferUpdate(container, payload) {
+    pendingUpdate = payload;
+    if (pendingTimer) {
+      return;
+    }
+    var wait = RECENT_INPUT_GRACE_MS - (Date.now() - lastLocalInputAt) + 20;
+    pendingTimer = setTimeout(function () {
+      pendingTimer = null;
+      var next = pendingUpdate;
+      pendingUpdate = null;
+      if (next) {
+        applyUpdate(container, next);
+      }
+    }, Math.max(wait, 20));
+  }
 
   function getFocusedFieldInfo(container) {
     var active = document.activeElement;
@@ -31,13 +67,32 @@
     if (!payload || typeof payload.html !== "string") {
       return;
     }
-    if (Date.now() - lastLocalInputAt < RECENT_INPUT_GRACE_MS) {
-      // The user's own next keystroke/submit will pick up the fresh state.
+    if (typingOnThisScreen(container)) {
+      deferUpdate(container, payload);
+      return;
+    }
+    pendingUpdate = null;
+    var screens = window.ThreeSeventyWeb && window.ThreeSeventyWeb.screens;
+    if (screens && !screens.accept(payload)) {
+      // Older than a screen already shown by the fetch after a key.
+      return;
+    }
+    if (screens && screens.isShowing(payload)) {
+      // The same screen the page already has, which is what the stream sends
+      // when it first sees the screen a key's own fetch already put up.
+      // Replacing it would throw away anything typed into it since.
+      screens.shown(payload);
+      if (typeof window.updateScreenStatusLine === "function") {
+        window.updateScreenStatusLine(payload);
+      }
       return;
     }
 
     var prior = getFocusedFieldInfo(container);
     container.innerHTML = payload.html;
+    if (screens) {
+      screens.shown(payload);
+    }
     if (typeof window.updateScreenStatusLine === "function") {
       window.updateScreenStatusLine(payload);
     }
@@ -76,8 +131,9 @@
 
     container.addEventListener(
       "input",
-      function () {
+      function (event) {
         lastLocalInputAt = Date.now();
+        lastInputForm = (event.target && event.target.form) || null;
       },
       true
     );
