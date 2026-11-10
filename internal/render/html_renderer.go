@@ -256,9 +256,16 @@ func (r *HtmlRenderer) createHtmlInput(sb *strings.Builder, f *host.Field, id, v
 
 	val = r.trimFieldVal(val)
 
+	// data-x, data-y and data-w name the cells this input covers, which is
+	// what every script that maps a screen cell to an input reads them as.
+	// A field that wraps continues at column 0 of each following row, so the
+	// inputs for those rows start there and not at the field's first column.
+	// The name keeps the field's own start, because that is how a submit
+	// finds the field again.
 	dataX := f.StartX
 	dataY := f.StartY
 	if lineNum > 0 {
+		dataX = 0
 		dataY += lineNum
 	}
 
@@ -550,10 +557,12 @@ func (r *HtmlRenderer) appendFocus(s *host.Screen, id string, sb *strings.Builde
 	if !s.IsFormatted {
 		sb.WriteString(` data-unformatted="1"`)
 	} else {
-		focused := s.GetInputFieldAt(s.CursorX, s.CursorY)
+		// The field the keyboard belongs in, which includes the field whose
+		// attribute byte the host left the cursor on (see KeyboardFieldAt).
+		focused, onAttribute := s.KeyboardFieldAt(s.CursorX, s.CursorY)
 		if focused != nil {
 			lineOffset := 0
-			if focused.IsMultiline() {
+			if focused.IsMultiline() && !onAttribute {
 				lineOffset = s.CursorY - focused.StartY
 				if lineOffset < 0 {
 					lineOffset = 0
@@ -572,7 +581,7 @@ func (r *HtmlRenderer) appendFocus(s *host.Screen, id string, sb *strings.Builde
 				inputStartX = 0
 			}
 			caret := s.CursorX - inputStartX
-			if caret < 0 {
+			if caret < 0 || onAttribute {
 				caret = 0
 			}
 			sb.WriteString(` data-field-name="field_`)

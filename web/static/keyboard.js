@@ -502,7 +502,7 @@
       cursorCol >= 0;
 
     if (hasCursor) {
-      var located = findInputAtCursor(form, cursorRow, cursorCol);
+      var located = findInputAtCursor(form, cursorRow, cursorCol) || markedFocus(form);
       if (located && located.input) {
         target = located.input;
         caret = located.caret;
@@ -529,6 +529,14 @@
       return;
     }
 
+    if (freeCursor && document.activeElement !== target) {
+      // The cursor stays out on protected text, where the host put it; this
+      // focus only gives keystrokes somewhere to arrive. Without the flag the
+      // focusin listener reads it as the operator choosing this field, drops
+      // the free cursor, and the next keystroke lands in whatever field this
+      // happened to be.
+      sinkFocusPending = true;
+    }
     target.focus();
     if (
       caret === null &&
@@ -908,6 +916,25 @@
       },
       true
     );
+  }
+
+  // markedFocus reads the field the server resolved for the host cursor from
+  // the focus marker it renders beside every screen (appendFocus in
+  // internal/render/html_renderer.go). It knows one thing a cell lookup
+  // cannot: a cursor resting on the attribute byte that opens an input field
+  // belongs in that field, which is where TSO leaves it in line mode.
+  function markedFocus(form) {
+    var scope = form.parentNode || document;
+    var marker = scope.querySelector("[data-initial-focus][data-field-name]");
+    if (!marker) {
+      return null;
+    }
+    var input = form.elements[marker.getAttribute("data-field-name")];
+    if (!input || !isScreenInput(input) || input.disabled || input.readOnly) {
+      return null;
+    }
+    var caret = parseInt(marker.getAttribute("data-caret"), 10);
+    return { input: input, caret: isNaN(caret) || caret < 0 ? 0 : caret };
   }
 
   function findInputAtCursor(form, row, col) {

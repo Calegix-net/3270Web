@@ -272,8 +272,8 @@ func TestRenderMultilineInputWidths(t *testing.T) {
 
 	expectedSubstrings := []string{
 		`<input type="text" name="field_3_0_0" class="color-input" value="ABC" maxlength="7" size="7" style="width: 7ch; max-width: 7ch;" data-x="3" data-y="0" data-w="7" data-fa="0x00" data-display="normal" data-hidden="0" data-protected="0" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />`,
-		`<input type="text" name="field_3_0_1" class="color-input" value="DEF" maxlength="10" size="10" style="width: 10ch; max-width: 10ch;" data-x="3" data-y="1" data-w="10" data-fa="0x00" data-display="normal" data-hidden="0" data-protected="0" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />`,
-		`<input type="text" name="field_3_0_2" class="color-input" value="G" maxlength="5" size="5" style="width: 5ch; max-width: 5ch;" data-x="3" data-y="2" data-w="5" data-fa="0x00" data-display="normal" data-hidden="0" data-protected="0" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />`,
+		`<input type="text" name="field_3_0_1" class="color-input" value="DEF" maxlength="10" size="10" style="width: 10ch; max-width: 10ch;" data-x="0" data-y="1" data-w="10" data-fa="0x00" data-display="normal" data-hidden="0" data-protected="0" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />`,
+		`<input type="text" name="field_3_0_2" class="color-input" value="G" maxlength="5" size="5" style="width: 5ch; max-width: 5ch;" data-x="0" data-y="2" data-w="5" data-fa="0x00" data-display="normal" data-hidden="0" data-protected="0" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />`,
 	}
 
 	for _, expected := range expectedSubstrings {

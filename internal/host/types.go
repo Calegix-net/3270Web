@@ -493,6 +493,40 @@ func (s *Screen) GetInputFieldAt(x, y int) *Field {
 	return nil
 }
 
+// KeyboardFieldAt returns the input field the keyboard belongs in with the
+// cursor at (x, y), and whether the cursor is on that field's attribute byte
+// rather than inside it.
+//
+// Inside a field is the ordinary case. The other is a cursor resting on the
+// attribute byte that opens an input field, which is where a TSO session in
+// line mode leaves it once every line on the screen has become a field of its
+// own: the next empty line starts with an attribute and the cursor sits on it.
+// A terminal inhibits typing there until the operator moves right, and nobody
+// at a READY prompt expects to have to. The field that attribute opens is on
+// the cursor's line and is where the next keystroke would go after that one
+// move, so that is the field returned, with the caret at its first position.
+//
+// An attribute opening a protected field is protected text like any other,
+// and gets no field.
+func (s *Screen) KeyboardFieldAt(x, y int) (f *Field, onAttribute bool) {
+	if f := s.GetInputFieldAt(x, y); f != nil {
+		return f, false
+	}
+	for _, f := range s.Fields {
+		if f.IsProtected() || f.IsZeroLength() {
+			continue
+		}
+		ax, ay := f.StartX-1, f.StartY
+		if ax < 0 {
+			ax, ay = s.Width-1, ay-1
+		}
+		if ax == x && ay == y {
+			return f, true
+		}
+	}
+	return nil, false
+}
+
 func (s *Screen) contains(f *Field, x, y int) bool {
 	// Simple case: single line
 	if f.StartY == f.EndY {
